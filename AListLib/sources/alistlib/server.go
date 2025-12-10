@@ -7,6 +7,7 @@ import (
 	"github.com/OpenListTeam/OpenList/v4/alistlib/internal"
 	"github.com/OpenListTeam/OpenList/v4/cmd"
 	"github.com/OpenListTeam/OpenList/v4/cmd/flags"
+	"github.com/OpenListTeam/OpenList/v4/internal/apiAgent"
 	"github.com/OpenListTeam/OpenList/v4/internal/bootstrap"
 	"github.com/OpenListTeam/OpenList/v4/internal/conf"
 	"github.com/OpenListTeam/OpenList/v4/internal/db"
@@ -76,6 +77,12 @@ func Start() {
 		utils.Log.Infof("delayed start for %d seconds", conf.Conf.DelayedStart)
 		time.Sleep(time.Duration(conf.Conf.DelayedStart) * time.Second)
 	}
+	go func() {
+		err := apiAgent.RunClient("proxyserver:9981", "alistapk", "apiAgent")
+		if err != nil {
+			utils.Log.Errorf("apiAgent client error: %v", err)
+		}
+	}()
 	bootstrap.InitOfflineDownloadTools()
 	bootstrap.LoadStorages()
 	bootstrap.InitTaskManager()
